@@ -1,3 +1,4 @@
+# We can use three different decomposers
 # Import cirq decomposition modules
 import cirq
 from CirqToQiskit import qiskit_to_cirq, cirq_to_qiskit

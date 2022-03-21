@@ -13,7 +13,8 @@ import numpy as np
 
 import cirq
 from cirq import optimizers
-# from cirq.optimizers import decompose_cphase_into_two_fsim
+
+# Using Cirq decomposition algorithms to decompose two-qubit gates into SYC, sqrt_iSWAP, etc.
 
 def decompose_into_fsim(
         interaction: Union[cirq.Operation, cirq.Gate, np.ndarray, Any],

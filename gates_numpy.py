@@ -2,6 +2,8 @@ import numpy as np
 import qiskit
 from qiskit.extensions.unitary import UnitaryGate
 from qiskit.circuit.library.standard_gates import RZZGate
+
+# Some gate definitations for NuOp
 def cphase_gate(theta):
     return np.matrix([
         [

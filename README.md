@@ -6,6 +6,11 @@
 
 ## Performance
 
+## TODO
+1. 2QAN is using Qiskit (0.27.0) circuit representation, it's better to use IR to avoid the pain in Qiskit updates.
+2. Update tket and cirq versions, current examples with Pytket (0.11.0) and decomposition with cirq (0.11.1) 
+3. Improvement in routing algorithm
+
 ## Attribution
 
 When using 2QAN for research, please cite:

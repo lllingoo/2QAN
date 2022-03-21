@@ -8,7 +8,7 @@ from pytket.predicates import CompilationUnit
 from pytket.routing import Architecture, SquareGrid
 from pytket.device import Device
 
-
+# We compare 2QAN with tket
 class TketCompile(object):
     """Compile circuits using tket [1]
     [1] tket compiler: 

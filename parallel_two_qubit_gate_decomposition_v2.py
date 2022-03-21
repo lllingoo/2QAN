@@ -17,6 +17,10 @@ from cirq.circuits.qasm_output import QasmUGate, QasmTwoQubitGate
 
 from gates_numpy import get_gate_unitary_qiskit
 
+# The NuOp decomposition algorithms developed by 
+# Lingling Lao, Prakash Murali, Margaret Martonosi, Dan Browne. 
+# Designing calibration and expressivity-efficient instruction sets for quantum computing,
+# 2021 ACM/IEEE 48th Annual International Symposium on Computer Architecture (ISCA)
 class GateTemplate:
     """
     Creates a unitary matrix using a specified two-qubit gate, number of layers

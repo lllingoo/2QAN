@@ -1,3 +1,4 @@
+# Circuit conversion between Cirq and Qiskit
 import numpy as np
 import cirq # version 0.8.0
 from cirq import LineQubit

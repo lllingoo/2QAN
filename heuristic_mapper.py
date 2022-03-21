@@ -4,7 +4,6 @@ import copy
 
 from bench_arch import BenchArch
 
-
 class HeuristicMapper(BenchArch):
     """
     Formualte the qubit placement problem as a quadratic assignment problem (QAP) [1]

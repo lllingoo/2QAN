@@ -205,7 +205,7 @@ class QuRouter(BenchArch):
 
             # TODO: if there are multiple minimal sets, 
             # select the one which leads to shortest depth, 
-            # or select the one which has more movements on existing gate pairs
+            # or select the one which has more movements on existing gate pairs.
             fmove = moves[dmin_id]
             if fmove in instrs_canswap:
                 instrs_canswap.remove(fmove)

@@ -125,5 +125,5 @@ default of 88 (this is configured in the [`pyproject.toml`](https://github.com/u
 If you are interested in adding a larger new feature or functionality to 2QAN, please 
 
 ## Code of conduct
-Mitiq development abides to the [Contributors' Covenant](https://mitiq.readthedocs.io/en/latest/code_of_conduct.html).
+2QAN development abides to the [Contributors' Covenant](https://mitiq.readthedocs.io/en/latest/code_of_conduct.html).
 

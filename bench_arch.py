@@ -1,28 +1,31 @@
 import numpy as np
 import math
 import networkx as nx
+from qiskit import QuantumCircuit
 from qiskit.circuit import Barrier, Measure
 from qiskit.circuit.library.standard_gates import HGate
 
 class BenchArch(object):
     """Base class for generating device coupling graph, circuit dag graph"""
-    def __init__(self, benchmark, lattice_xy, coupling_map=None):
+    def __init__(self, qasm, lattice_xy, coupling_map=None):
         """
         Args:
-            benchmark: currently in qiskit circuit format
+            qasm: circuit in OpenQASM format
             lattice_xy: (x,y) if coupling_map is not given and the topology is grid
             coupling_map: connectivity between qubits such as 
             [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (0,7), (0,8), (1,9), (0,10)]
         """
-
-        self.benchmark = benchmark
-
+        # Transform OpenQASM to qiskit circuit
+        self.benchmark = QuantumCircuit.from_qasm_str(qasm)
+        self.b_qbts = len(self.benchmark.qubits)
         # Generate the topology graph (2d grid) and the distance matrix
         if coupling_map:
             self.coupling_map = coupling_map
         else:
             self.lattice_x, self.lattice_y = lattice_xy
             self.coupling_map = self.grid_coupling()
+
+        # n_qbits is the number of qubits in the given topology
         self.topology, self.distmat, self.n_qbits = self.topology_graph()
         self.G_circ, self.pairs, self.instrs, self.q1_instrs = self.circuit_graph()
         adjmat_csr = nx.adjacency_matrix(self.G_circ)

@@ -4,6 +4,11 @@ import copy
 
 from bench_arch import BenchArch
 
+# To run the qiskit mapper
+from qiskit.transpiler.passes import SabreLayout
+from qiskit.transpiler import CouplingMap
+from qiskit.converters import circuit_to_dag
+
 class HeuristicMapper(BenchArch):
     """
     Formualte the qubit placement problem as a quadratic assignment problem (QAP) [1]
@@ -13,32 +18,35 @@ class HeuristicMapper(BenchArch):
     ISCA'22, arXiv:2108.02099.
     [2] https://github.com/zeman412/Tabu_Search_QAP_20
     """
-    def __init__(self, benchmark, lattice_xy, coupling_map):
+    def __init__(self, qasm, lattice_xy, coupling_map):
         """
         Args:
-            benchmark: currently in qiskit circuit format
+            qasm: circuit in OpenQASM format
             lattice_xy: (x,y) if coupling_map is not given and the topology is grid
             coupling_map: connectivity between qubits such as 
             [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (0,7), (0,8), (1,9), (0,10)]
         """
-        super().__init__(benchmark, lattice_xy, coupling_map)
+        super().__init__(qasm, lattice_xy, coupling_map)
         self.flow = np.array(copy.deepcopy(self.adjmat))
         self.dist = np.array(copy.deepcopy(self.distmat))
         self.idx = -1
         self.N = int(self.n_qbits*(self.n_qbits-1)/2)
         self.neighbors = np.zeros((self.N, self.n_qbits +2), dtype=int)
 
-    def run(self, output=None, num_iter=200, lst_len=20):
-        
+    def run_qiskit(self, max_iterations=5):
+        # run the SABRE mapper in qiskit
+        mapper = SabreLayout(CouplingMap(self.coupling_map),max_iterations=max_iterations)
+        mapper.run(circuit_to_dag(self.benchmark))
+        vpmap = mapper.property_set["layout"].get_virtual_bits()
+        init_map0 = {}
+        for k,v in vpmap.items():
+            init_map0[k.index]=v
+        init_map = fill_partial_mapping(init_map0, self.coupling_map)
+        return init_map
+
+    def run_qap(self, num_iter=200, lst_len=20):
+        # run the QAP mapper
         vp_map, cost = self.place_tabu(num_iter, lst_len)
-        if output:
-            output_placement = './maps/' + str(output) + '_vpmap_heuristic.txt'
-            target = open(output_placement, "w")
-            target.write("# name = %s \n" %output)
-            target.write("# map_type = Heuristic Mapper \n")
-            target.write("# Z = %d \n" % cost)
-            target.write("VP MAP %s \n" % vp_map)
-            target.close()
         self.reset()
         return vp_map, cost
 
@@ -142,3 +150,18 @@ class HeuristicMapper(BenchArch):
         self.locs_pqbits = {}
         self.flow = None
         self.dist = None
+
+
+def fill_partial_mapping(partial_map, coupling_map):
+    # Fill the qubit map when #qubits in the circuit is fewer than #qubits in the given topology
+    final_map = partial_map.copy()
+    n_qbts = len(partial_map)
+    device_qubits = []
+    for edge in coupling_map:
+        for q in edge:
+            if q not in device_qubits:
+                device_qubits.append(q)
+    unused_dqs = [q for q in device_qubits if q not in partial_map.values()]
+    for i in range(len(unused_dqs)):
+        final_map[n_qbts+i]=unused_dqs[i]
+    return final_map

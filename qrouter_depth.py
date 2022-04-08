@@ -1,7 +1,5 @@
 import numpy as np
 import networkx as nx
-import pickle as pkl
-import os
 import copy
 
 from bench_arch import BenchArch
@@ -19,20 +17,20 @@ class QuRouter(BenchArch):
     """
     The permutation-aware routing and scheduling heuristics developed in 2QAN [1]
     **References:**
-    [1] Lingling Lao, Dan E Browne. 2QAN: A quantum compiler for 2-local Hamiltonian simulation algorithms, 
+    [1] Lingling Lao, Dan E. Browne. 2QAN: A quantum compiler for 2-local Hamiltonian simulation algorithms, 
     ISCA'22, arXiv:2108.02099.
     """
-    def __init__(self, benchmark, lattice_xy, init_map, coupling_map=None, verbose=False):
+    def __init__(self, qasm, lattice_xy, init_map, coupling_map=None, verbose=False):
         """
         Args:
-            benchmark: currently in qiskit circuit format
+            qasm: circuit in OpenQASM format
             lattice_xy(tuple): (x,y) if coupling_map is not given and the topology is grid
             init_map(dict): the initial qubit map {circuit qubit index: device qubit index}
             coupling_map(list): connectivity between qubits such as 
             [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (0,7), (0,8), (1,9), (0,10)]
             verbose(bool): True if print out intermediate mapping info
         """
-        super().__init__(benchmark, lattice_xy, coupling_map)
+        super().__init__(qasm, lattice_xy, coupling_map)
 
         self.init_map = init_map
         self.init_instrs, self.unroute_instrs = self.find_r_ur_instrs(self.pairs, self.init_map)
@@ -435,8 +433,7 @@ class QuRouter(BenchArch):
         for c in order_g0:
             new_init_routed += order_g0[c]
 
-        from qiskit import QuantumCircuit
-        qc = QuantumCircuit(len(self.benchmark.qubits), len(self.benchmark.qubits))
+        qc = QuantumCircuit(self.b_qbts, self.b_qbts)
         if self.q1_instrs[0]:
             for gate in self.q1_instrs[0]:
                 qc.append(gate[0], [gate[1]])
@@ -448,14 +445,7 @@ class QuRouter(BenchArch):
             for gate in self.q1_instrs[1]:
                 qc.append(gate[0], [gate[1]])
 
-        if bench == 'qaoa':
-            with open(os.path.join('./qaoa/', 'qaoa_maxcut'+str(len(self.benchmark.qubits))
-                        /+'_circuits_new.pkl'), 'wb') as f:
-                pkl.dump(qc, f)
-        else:
-            with open(os.path.join('./benchmark/', bench+str(len(self.benchmark.qubits))
-                    /+'_new.pkl'), 'wb') as f:
-                pkl.dump(qc, f)
+        return qc
 
     def construct_circ(self, ordered_all_instrs, dressed_instrs, 
                         ordered_all_instrs_phy, layers=1, msmt=False):
@@ -465,7 +455,7 @@ class QuRouter(BenchArch):
         for even layers, we reverse the circuit.
         """
         swap_mat = SwapGate().to_matrix()
-        new_circ = QuantumCircuit(self.n_qbits, len(self.benchmark.qubits))
+        new_circ = QuantumCircuit(self.n_qbits, self.b_qbts)
 
         if self.q1_instrs[0]:
             for gate in self.q1_instrs[0]:
@@ -509,14 +499,14 @@ class QuRouter(BenchArch):
         if msmt:
             # The measurement outcome goes to classical bits 
             # which are indexed by their virtual qubit indices
-            for cv in range(len(self.benchmark.qubits)):
+            for cv in range(self.b_qbts):
                 new_circ.measure(fnl_vpmap[cv], cv)
         return new_circ
 
     def construct_qaoa(self, ordered_all_instrs, dressed_instrs, ordered_all_instrs_phy, 
                         layers=1, gammas=None, betas=None, msmt=False, init_map=None, maps=None):
         swap_mat = SwapGate().to_matrix()
-        new_circ = QuantumCircuit(self.n_qbits, len(self.benchmark.qubits))
+        new_circ = QuantumCircuit(self.n_qbits, self.b_qbts)
 
         if self.q1_instrs[0]:
             for gate in self.q1_instrs[0]:
@@ -558,7 +548,7 @@ class QuRouter(BenchArch):
         if msmt:
             # The measurement outcome goes to classical bits which are indexed 
             # by their virtual qubit indices
-            for cv in range(len(self.benchmark.qubits)):
+            for cv in range(self.b_qbts):
                 new_circ.measure(fnl_vpmap[cv], cv)
         return new_circ
 
@@ -574,15 +564,15 @@ class QuRouter(BenchArch):
 
         new_circ = self.construct_qaoa(ordered_all_instrs, dressed_instrs, 
                             ordered_all_instrs_phy, layers, gammas, betas, msmt, init_map, maps)
-        return new_circ, (self.swap_count, self.dswap_count), (ordered_all_instrs, dressed_instrs, ordered_all_instrs_phy)
+        return new_circ, (layers*self.swap_count, layers*self.dswap_count), (ordered_all_instrs, dressed_instrs, ordered_all_instrs_phy)
 
-    def run(self, layers, msmt='False'):
+    def run(self, layers=1, msmt='False'):
         self.router()
         ordered_all_instrs, dressed_instrs, ordered_all_instrs_phy = self.scheduler()
         new_circ = self.construct_circ(ordered_all_instrs, dressed_instrs, 
                                         ordered_all_instrs_phy, layers, msmt)
 
-        return new_circ, (self.swap_count, self.dswap_count)
+        return new_circ, (layers*self.swap_count, layers*self.dswap_count)
 
 
 def locate_min(a):

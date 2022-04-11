@@ -1,6 +1,6 @@
 # 2QAN
 
-[![PyPI version](https://badge.fury.io/py/Py2QAN.svg)](https://badge.fury.io/py/Py2QAN)
+[![PyPI version](https://badge.fury.io/py/py2QAN.svg)](https://badge.fury.io/py/py2QAN)
 [![arXiv](https://img.shields.io/badge/arXiv-2108.02099-<COLOR>.svg)](https://arxiv.org/abs/2108.02099)
 [![Unitary Fund](https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=for-the-badge)](http://unitary.fund)
 
@@ -15,15 +15,16 @@ The QAP mapper could find good qubit initial placements for small circuits, but 
 
 ## Installation
 
-PyMatching can be downloaded and installed from [PyPI](https://pypi.org/project/Py2QAN/) with the command:
+Py2QAN can be downloaded and installed from [PyPI](https://pypi.org/project/Py2QAN/) with the command:
 ```
 pip install py2qan
 ```
 Note that Py2QAN requires Python 3.
 
 
-## Usage
+## Example
 
+Check out the examples [here](https://github.com/lllingoo/2QAN/tree/master/tests)
 
 
 ## Attribution

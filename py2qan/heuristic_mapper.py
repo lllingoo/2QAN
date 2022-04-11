@@ -2,7 +2,7 @@ import numpy as np
 import random
 import copy
 
-from bench_arch import BenchArch
+from py2qan.bench_arch import BenchArch
 
 # To run the qiskit mapper
 from qiskit.transpiler.passes import SabreLayout

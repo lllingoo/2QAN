@@ -2,9 +2,9 @@ import numpy as np
 import networkx as nx
 import copy
 
-from bench_arch import BenchArch
-from heuristic_mapper import HeuristicMapper
-from scheduler import Scheduler
+from py2qan.bench_arch import BenchArch
+from py2qan.heuristic_mapper import HeuristicMapper
+from py2qan.scheduler import Scheduler
 
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Operator

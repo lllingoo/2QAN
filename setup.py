@@ -32,6 +32,8 @@ setup(
     name="py2QAN",
     version=__version__,
     install_requires=requirements,
+    # packages=find_packages("py2qan"),
+    # package_dir={'':'py2qan'},
     packages=find_packages(),
     include_package_data=True,
     description="2QAN is an open source compiler for two-local qubit Hamiltonian simulation algorithms.",
